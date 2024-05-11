@@ -1,44 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import "./App.css";
 
 function Stopwatch() {
-  const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const intervalRef = useRef();
 
-  useEffect(() => {
-    let timer;
-    if (isRunning) {
-      timer = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } else {
-      clearInterval(timer);
-    }
-
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  const startStopwatch = () => {
-    setIsRunning(!isRunning);
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  const resetStopwatch = () => {
+  const startTimer = () => {
+    setIsRunning(true);
+    intervalRef.current = setInterval(() => {
+      setTime((prevTime) => prevTime + 1);
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(intervalRef.current);
+    setIsRunning(false);
+  };
+
+  const resetTimer = () => {
+    clearInterval(intervalRef.current);
     setIsRunning(false);
     setTime(0);
   };
 
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
   return (
-    <div>
+    <div className="stopwatch">
       <h1>Stopwatch</h1>
-      <div>
-        <p>{formatTime(time)}</p>
-        <button onClick={startStopwatch}>{isRunning ? "Stop" : "Start"}</button>
-        <button onClick={resetStopwatch}>Reset</button>
+      <div className="time">Time: {formatTime(time)}</div>
+      <div className="buttons">
+        {!isRunning ? (
+          <button onClick={startTimer}>Start</button>
+        ) : (
+          <button onClick={stopTimer}>Stop</button>
+        )}
+        <button onClick={resetTimer}>Reset</button>
       </div>
     </div>
   );
